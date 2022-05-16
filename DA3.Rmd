@@ -43,5 +43,9 @@ data_tw <- data_tw %>%
   mutate(SplineBreak1 = (Trend - 58)*DV1)
 
 data_tw <- data_tw %>%
-  mutate(SplineBreak12 = (Trend - 99)*DV2)
+  mutate(SplineBreak2 = (Trend - 99)*DV2)
+```
+
+```{r}
+model1 <- lm(log(gdppc)~Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_tw)
 ```
