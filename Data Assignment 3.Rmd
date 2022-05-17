@@ -1,0 +1,47 @@
+---
+title: "Data Assignment 3"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(pander)
+library(ggplot2)
+
+data_tw <- read_excel("ECON430 DA3 Data.xlsx")
+```
+
+### Create Variables
+```{r}
+data_tw <- data_tw %>% mutate(DV1 = ifelse(year >= 1959,1,0), DV2 = ifelse(year >= 2000,1,0))
+
+data_tw <- data_tw %>%
+  mutate(SplineBreak1 = (Trend - 58)*DV1)
+
+data_tw <- data_tw %>%
+  mutate(SplineBreak2 = (Trend - 99)*DV2)
+```
+
+### Implement First Regression
+```{r}
+model1 <- lm(log(gdppc)~Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_tw)
+
+pander(summary(model1))
+```
+
+#### Graph
+```{r, warning=FALSE}
+predicted_df1 <- data.frame(gdppc_prd = predict(model1, data_tw), year=data_tw$year)
+
+ggplot(data_tw, aes(x=year,y=log(gdppc))) +
+  geom_point() +
+  geom_line(color='red',data = predicted_df1, aes(x=year, y=gdppc_prd))
+  
+```
+
