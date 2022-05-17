@@ -35,7 +35,7 @@ library(readxl)
 
 data_tw <- read_excel("/Users/donovanobrian/Documents/Econ430/DA3/ECON430\ DA3\ Data.xlsx")
 ```
-
+### Create Variables
 ```{r}
 data_tw <- data_tw %>% mutate(DV1 = ifelse(year >= 1959,1,0), DV2 = ifelse(year >= 2000,1,0))
 
@@ -45,7 +45,17 @@ data_tw <- data_tw %>%
 data_tw <- data_tw %>%
   mutate(SplineBreak2 = (Trend - 99)*DV2)
 ```
-
+### Implement Regression
 ```{r}
+library(pander)
+
 model1 <- lm(log(gdppc)~Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_tw)
+
+pander(summary(model1))
+```
+
+#### Graph
+```{r}
+library(ggplot2)
+
 ```
