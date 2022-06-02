@@ -20,10 +20,10 @@ data_pn <- read_excel("Final_simp.xlsx")
 ```{r}
 data_pnbr <- select(data_pn, country, year, Trend, rgdpe, pop)
 
-data_br <- data_pnbr %>% mutate(DV1 = ifelse(year >= 2003,1,0))
+data_br <- data_pnbr %>% mutate(DV2 = ifelse(year >= 2003,1,0))
 
 data_br <- data_br %>%
-  mutate(SplineBreak1 = (Trend - 53)*DV1)
+  mutate(SplineBreak2 = (Trend - 53)*DV2)
 
 data_br <- data_br %>%
   mutate(gdppc = rgdpe/pop)
@@ -32,7 +32,7 @@ data_br <- data_br %>%
 
 ### Implement First Regression
 ```{r}
-model1 <- lm(log(gdppc)~Trend+DV1+Trend*DV1,data=data_br)
+model1 <- lm(log(gdppc)~Trend+DV2+Trend*DV2,data=data_br)
 
 #pander(summary(model1))
 
@@ -59,7 +59,7 @@ ggplot(data_br, aes(x=year,y=gdppc)) +
 
 ## Spline Method
 ```{r}
-spline_model <- lm(log(gdppc)~Trend+SplineBreak1,data=data_br)
+spline_model <- lm(log(gdppc)~Trend+SplineBreak2,data=data_br)
 
 pander(summary(spline_model))
 ```
@@ -75,4 +75,50 @@ ggplot(data_br, aes(x=year,y=log(gdppc))) +
                       values = c("Actual"="black", "Predicted"="red")) +
   labs(title = "Level of the log of GDP per capita (Spline)")
 
+```
+
+### Three Breaks
+```{r}
+data_br <- data_br %>% mutate(DV1 = ifelse(year >= 1978,1,0))
+
+data_br <- data_br %>%
+  mutate(SplineBreak1 = (Trend - 27)*DV1)
+
+model2 <- lm(log(gdppc)~Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_br)
+
+predicted_df1_1 <- data.frame(gdppc_prd = predict(model2, data_br), year=data_br$year)
+
+ggplot(data_br, aes(x=year,y=log(gdppc))) +
+  geom_point(aes(colour= "Actual")) +
+  geom_line(aes(x=year, y=gdppc_prd, colour = "Predicted"),data = predicted_df1_1) +
+  scale_colour_manual("",
+                      values = c("Actual"="black", "Predicted"="red")) +
+  labs(title = "Level of the log of GDP per capita")
+
+```
+
+
+### Other Variables
+```{r}
+data_pnbr <- select(data_pn, country, year, Trend, rgdpe, pop, hc, cn, ctfp)
+
+data_ed <- data_pnbr %>% mutate(DV2 = ifelse(year >= 2003,1,0))
+
+data_ed <- data_ed %>%
+  mutate(SplineBreak2 = (Trend - 53)*DV2)
+
+data_ed <- data_ed %>%
+  mutate(gdppc = rgdpe/pop)
+```
+
+```{r}
+model_ed <- lm(gdppc~hc+cn+ctfp,data=data_ed)
+
+summary(model_ed)
+```
+
+```{r}
+model3 <- lm(hc~Trend+DV2+Trend*DV2,data=data_ed)
+
+summary(model3)
 ```
