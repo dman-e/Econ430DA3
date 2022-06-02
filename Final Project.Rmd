@@ -1,0 +1,78 @@
+---
+title: "Final Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
+library(pander)
+library(ggplot2)
+
+data_pn <- read_excel("Final_simp.xlsx")
+```
+
+### Create Variables
+```{r}
+data_pnbr <- select(data_pn, country, year, Trend, rgdpe, pop)
+
+data_br <- data_pnbr %>% mutate(DV1 = ifelse(year >= 2003,1,0))
+
+data_br <- data_br %>%
+  mutate(SplineBreak1 = (Trend - 53)*DV1)
+
+data_br <- data_br %>%
+  mutate(gdppc = rgdpe/pop)
+  
+```
+
+### Implement First Regression
+```{r}
+model1 <- lm(log(gdppc)~Trend+DV1+Trend*DV1,data=data_br)
+
+#pander(summary(model1))
+
+summary(model1)
+```
+
+#### Graph
+```{r, warning=FALSE}
+predicted_df1 <- data.frame(gdppc_prd = predict(model1, data_br), year=data_br$year)
+
+ggplot(data_br, aes(x=year,y=log(gdppc))) +
+  geom_point(aes(colour= "Actual")) +
+  geom_line(aes(x=year, y=gdppc_prd, colour = "Predicted"),data = predicted_df1) +
+  scale_colour_manual("",
+                      values = c("Actual"="black", "Predicted"="red")) +
+  labs(title = "Level of the log of GDP per capita")
+
+
+ggplot(data_br, aes(x=year,y=gdppc)) +
+  geom_point() 
+#  geom_line(color='red',data = predicted_df1, aes(x=year, y=gdppc_prd))
+  
+```
+
+## Spline Method
+```{r}
+spline_model <- lm(log(gdppc)~Trend+SplineBreak1,data=data_br)
+
+pander(summary(spline_model))
+```
+
+### Graph
+```{r, warning=FALSE}
+predicted_df2 <- data.frame(gdppc_prd2 = predict(spline_model, data_br), year=data_br$year)
+
+ggplot(data_br, aes(x=year,y=log(gdppc))) +
+  geom_point(aes(colour= "Actual")) +
+  geom_line(aes(x=year, y=gdppc_prd2, colour = "Predicted"),data = predicted_df2) +
+  scale_colour_manual("",
+                      values = c("Actual"="black", "Predicted"="red")) +
+  labs(title = "Level of the log of GDP per capita (Spline)")
+
+```
