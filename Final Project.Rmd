@@ -21,7 +21,7 @@ data_md <- read_excel("Turkey Madison Project Data.xlsx")
 
 ### Create Variables
 ```{r}
-data_pnbr <- select(data_pn, country, year, Trend, rgdpe, pop)
+data_pnbr <- dplyr::select(data_pn,country, year, Trend, rgdpe, pop)
 
 data_br <- data_pnbr %>% mutate(DV2 = ifelse(year >= 2003,1,0))
 
@@ -103,15 +103,7 @@ ggplot(data_br, aes(x=year,y=log(gdppc))) +
 ```
 #### Is the growth in the final period significnatly different than the first?
 ```{r}
-#library(multcomp)
-
 multcomp::glht(model2, linfct = c("Trend:DV1 + Trend:DV2 = 0")) %>% summary
-
-#m1 <- lm(log(gdppc)~(Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_br))
-#m1 <- lm(log(gdppc)~I(Trend+DV1+Trend*DV1+DV2+Trend*DV2),data=data_br)
-
-
-#anova(m1,model2)
 ```
 
 #### Using Madison Data
@@ -172,7 +164,7 @@ ggplot(data_md, aes(x=year,y=log(gdppc))) +
 
 ### Other Variables
 ```{r}
-data_pned <- select(data_pn, country, year, Trend, rgdpe, pop, hc, cn, ctfp)
+data_pned <- dplyr::select(data_pn, country, year, Trend, rgdpe, pop, hc, cn, ctfp)
 
 data_ed <- data_pned %>% mutate(DV2 = ifelse(year >= 2003,1,0))
 
