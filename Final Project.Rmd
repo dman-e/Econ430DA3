@@ -13,6 +13,7 @@ library(readxl)
 library(pander)
 library(ggplot2)
 library(stargazer)
+library(multcomp)
 
 data_pn <- read_excel("Final_simp.xlsx")
 data_md <- read_excel("Turkey Madison Project Data.xlsx")
@@ -59,14 +60,14 @@ ggplot(data_br, aes(x=year,y=gdppc)) +
   
 ```
 
-## Spline Method
+#### Spline Method
 ```{r}
 spline_model <- lm(log(gdppc)~Trend+SplineBreak2,data=data_br)
 
 pander(summary(spline_model))
 ```
 
-### Graph
+#### Graph
 ```{r, warning=FALSE}
 predicted_df2 <- data.frame(gdppc_prd2 = predict(spline_model, data_br), year=data_br$year)
 
@@ -99,6 +100,18 @@ ggplot(data_br, aes(x=year,y=log(gdppc))) +
                       values = c("Actual"="black", "Predicted"="red")) +
   labs(title = "Level of the log of GDP per capita")
 
+```
+#### Is the growth in the final period significnatly different than the first?
+```{r}
+#library(multcomp)
+
+multcomp::glht(model2, linfct = c("Trend:DV1 + Trend:DV2 = 0")) %>% summary
+
+#m1 <- lm(log(gdppc)~(Trend+DV1+Trend*DV1+DV2+Trend*DV2,data=data_br))
+#m1 <- lm(log(gdppc)~I(Trend+DV1+Trend*DV1+DV2+Trend*DV2),data=data_br)
+
+
+#anova(m1,model2)
 ```
 
 #### Using Madison Data
